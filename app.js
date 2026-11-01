@@ -558,29 +558,58 @@ function initCpuEngine() {
         benchStatusBadge.style.color = '#92400E';
       }
 
-      let progress = 0;
-      let scoreTicker = 0;
-      const targetScore = Math.round(cores * 2850 + Math.random() * 800 + 4200);
+      // ── GERÇEK ZAMANLI CPU BENCHMARK ──
+      // 5 saniye boyunca gerçek CPU işi yapar, ops/sn ölçer.
+      // Kalibrasyon: ~200 ops/sn ≈ orta segment cihaz → final ~1000 puan
+      // Kalibrasyon çarpanı: finalScore = ops * 5  (yaklaşık 800–2500 arası gerçekçi aralık)
+      const BENCH_DURATION_MS = 5000;
+      const CALIBRATION = 5;          // ops başına puan — PlayStore uygulamalarıyla aynı skalaya getirir
+      const CHUNK_BUDGET_MS   = 40;   // her frame'de max 40 ms CPU bloklanır, UI donmaz
 
-      const interval = setInterval(() => {
-        let x = 0;
-        for (let i = 0; i < 200000; i++) {
-          x += Math.sqrt(i) * Math.sin(i);
+      let ops       = 0;
+      let startTime = performance.now();
+
+      if (benchmarkScoreVal) benchmarkScoreVal.textContent = '0';
+
+      const runChunk = () => {
+        const chunkStart = performance.now();
+
+        // Gerçek CPU yükü: sqrt + sin + tamsayı döngüsü
+        while (performance.now() - chunkStart < CHUNK_BUDGET_MS) {
+          let x = 0;
+          for (let i = 1; i <= 10000; i++) {
+            x += Math.sqrt(i) * Math.sin(i * 0.0314159);
+          }
+          ops++;
         }
 
-        progress += 20;
-        scoreTicker = Math.round((progress / 100) * targetScore);
-        if (benchmarkScoreVal) benchmarkScoreVal.textContent = scoreTicker.toLocaleString('tr-TR');
-        playHaptic(10);
+        const elapsed  = performance.now() - startTime;
+        const liveScore = Math.round(ops * CALIBRATION);
+        const progress  = Math.min(100, (elapsed / BENCH_DURATION_MS) * 100);
 
-        if (progress >= 100) {
-          clearInterval(interval);
+        // Canlı skor güncelle
+        if (benchmarkScoreVal) benchmarkScoreVal.textContent = liveScore.toLocaleString('tr-TR');
+
+        if (elapsed < BENCH_DURATION_MS) {
+          requestAnimationFrame(runChunk);  // devam
+        } else {
+          // ── SONUÇ ──
+          const finalScore = Math.round(ops * CALIBRATION);
+
+          // Performans sınıflandırması
+          let perfLabel;
+          if      (finalScore >= 2500) perfLabel = 'Üst Segment';
+          else if (finalScore >= 1500) perfLabel = 'Orta-Üst Segment';
+          else if (finalScore >= 800)  perfLabel = 'Orta Segment';
+          else                          perfLabel = 'Giriş Segment';
+
           State.benchmarkRunning = false;
           btnRunBenchmark.disabled = false;
           btnRunBenchmark.style.opacity = '1';
 
-          if (benchmarkScoreVal) benchmarkScoreVal.textContent = targetScore.toLocaleString('tr-TR');
-          if (benchmarkScoreSub) benchmarkScoreSub.textContent = `Mükemmel Performans • İlk %4 Dilim (Cihaz Skoru: ${targetScore})`;
+          if (benchmarkScoreVal) benchmarkScoreVal.textContent = finalScore.toLocaleString('tr-TR');
+          if (benchmarkScoreSub) benchmarkScoreSub.textContent =
+            `${perfLabel} • Gerçek Ölçüm (5 sn CPU testi) • Skor: ${finalScore}`;
           if (benchStatusBadge) {
             benchStatusBadge.textContent = 'TAMAMLANDI';
             benchStatusBadge.style.background = '#ECFDF5';
@@ -589,7 +618,9 @@ function initCpuEngine() {
           playSuccessChime();
           playHaptic([50, 100, 50, 100]);
         }
-      }, 950);
+      };
+
+      requestAnimationFrame(runChunk);
     });
   }
 }
