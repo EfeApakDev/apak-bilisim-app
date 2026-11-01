@@ -288,46 +288,118 @@ function initBatteryEngine() {
     }
   }
 
-  // Live Jitter Loop: Updates mA and Watt dynamically every 800ms to show real live fluctuation
+  // ── NATIVE BRIDGE veya Web Battery API ──
+  const HAS_NATIVE = (typeof window.AndroidBridge !== 'undefined');
+
+  function applyNativeBatteryData() {
+    try {
+      const raw = window.AndroidBridge.getBatteryData();
+      const d   = JSON.parse(raw);
+      if (d.error) return false;
+
+      // Şarj durumu
+      State.isCharging  = d.charging;
+      State.batteryLevel = d.level / 100;
+      renderBatteryState();
+
+      const isCharging = d.charging;
+      const level      = d.level;
+      const ma         = d.current_ma;          // negatif=deşarj, pozitif=şarj
+      const maAbs      = d.current_ma_abs;
+      const voltMv     = d.voltage_mv;
+      const voltV      = (voltMv / 1000).toFixed(3);
+      const watt       = d.power_w;
+      const temp       = d.temperature;
+      const remainMAh  = d.remaining_mah || 0;
+
+      State.currentMa = ma;
+
+      // mA göster
+      const maSign = isCharging ? `+${maAbs.toLocaleString('tr-TR')}` : `${ma.toLocaleString('tr-TR')}`;
+      if (detailBatteryMa)  detailBatteryMa.textContent  = maSign;
+      if (gridBatteryRate)  gridBatteryRate.textContent   = `${maSign} mA`;
+      if (detailWatt)       detailWatt.textContent        = `${watt} W`;
+      if (detailVoltage)    detailVoltage.textContent     = `${voltMv.toLocaleString('tr-TR')} mV`;
+      if (detailTemp)       detailTemp.textContent        = `${temp.toFixed(1)} °C`;
+
+      // Kalan mAh göster (varsa)
+      const remainEl = document.getElementById('detailRemainingMah');
+      if (remainEl && remainMAh > 0) remainEl.textContent = `${remainMAh.toLocaleString('tr-TR')} mAh`;
+
+      // Süre
+      if (isCharging && d.time_to_full_str) {
+        if (detailTimeRemain) detailTimeRemain.textContent = d.time_to_full_str;
+      } else if (!isCharging && d.time_remaining_str) {
+        if (detailTimeRemain) detailTimeRemain.textContent = d.time_remaining_str;
+      } else if (maAbs > 0 && remainMAh > 0) {
+        // Hesapla
+        const hoursLeft = remainMAh / maAbs;
+        const hh = Math.floor(hoursLeft);
+        const mm = Math.round((hoursLeft - hh) * 60);
+        if (detailTimeRemain) detailTimeRemain.textContent = `${hh} Saat ${mm} Dk`;
+      }
+
+      // Pil kapasitesi
+      const capEl = document.getElementById('detailBatteryCapacity');
+      if (capEl) {
+        if (d.full_capacity_mah > 0)   capEl.textContent = `${d.full_capacity_mah.toLocaleString('tr-TR')} mAh`;
+        else if (d.design_capacity_mah > 0) capEl.textContent = `${d.design_capacity_mah.toLocaleString('tr-TR')} mAh`;
+      }
+
+      // Pil sağlığı %
+      const healthPctEl = document.getElementById('healthProgressBar');
+      const healthLabelEl = document.getElementById('batteryHealthPct');
+      if (d.battery_health_pct && healthPctEl) {
+        healthPctEl.style.width = `${d.battery_health_pct}%`;
+        if (healthLabelEl) healthLabelEl.textContent = `${d.battery_health_pct}%`;
+      }
+
+      // Şarj kaynağı
+      const srcEl = document.getElementById('detailChargeSource');
+      if (srcEl && d.charge_source) srcEl.textContent = d.charge_source;
+
+      // Teknoloji
+      const techEl = document.getElementById('detailBatteryTech');
+      if (techEl && d.technology) techEl.textContent = d.technology;
+
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // Canlı güncelleme döngüsü — native varsa native, yoksa simülasyon
   setInterval(() => {
+    if (HAS_NATIVE) {
+      applyNativeBatteryData();
+      return;
+    }
+
+    // ── FALLBACK: Web tarayıcı simülasyonu (PC/PWA) ──
     const isCharging = State.isSimulatedUnplugged ? false : State.isCharging;
     const level = Math.round(State.batteryLevel * 100);
 
     if (isCharging) {
-      // Natural jitter around 4750-4890 mA
       const jitter = Math.floor(Math.random() * 160) - 80;
       const ma = Math.max(2400, 4820 + jitter);
       State.currentMa = ma;
-
-      const volts = 4.38; // 4380 mV
-      const watt = ((ma * 9.8) / 1000).toFixed(1); // Fast charger PD negotiation
-
+      const watt = ((ma * 9.0) / 1000).toFixed(1);
       if (detailBatteryMa) detailBatteryMa.textContent = `+${ma.toLocaleString('tr-TR')}`;
       if (gridBatteryRate) gridBatteryRate.textContent = `+${ma.toLocaleString('tr-TR')} mA`;
-      if (detailWatt) detailWatt.textContent = `${watt} W`;
-      if (detailVoltage) detailVoltage.textContent = '4,380 mV';
-      if (detailTemp) detailTemp.textContent = `${(32.8 + Math.random() * 0.6).toFixed(1)} °C`;
-
-      // Countdown to full (minutes & seconds)
+      if (detailWatt)      detailWatt.textContent      = `${watt} W`;
+      if (detailVoltage)   detailVoltage.textContent   = '4.380 mV';
+      if (detailTemp)      detailTemp.textContent      = `${(32.8 + Math.random() * 0.6).toFixed(1)} °C`;
       const remainMins = Math.max(4, Math.round((100 - level) * 1.3));
       const secs = Math.floor(Math.random() * 45 + 10);
       if (detailTimeRemain) detailTimeRemain.textContent = `${remainMins} dk ${secs} sn`;
-
     } else {
-      // Discharging: Negative consumption (-380 to -520 mA)
       const jitter = Math.floor(Math.random() * 80) - 40;
       const ma = -Math.abs(460 + jitter);
       State.currentMa = ma;
-
       const watt = ((Math.abs(ma) * 3.85) / 1000).toFixed(1);
-
       if (detailBatteryMa) detailBatteryMa.textContent = `${ma.toLocaleString('tr-TR')}`;
       if (gridBatteryRate) gridBatteryRate.textContent = `${ma.toLocaleString('tr-TR')} mA`;
-      if (detailWatt) detailWatt.textContent = `${watt} W`;
-      if (detailVoltage) detailVoltage.textContent = '3,860 mV';
-      if (detailTemp) detailTemp.textContent = `${(29.1 + Math.random() * 0.4).toFixed(1)} °C`;
-
-      // Time to empty
+      if (detailWatt)      detailWatt.textContent      = `${watt} W`;
+      if (detailVoltage)   detailVoltage.textContent   = '3.860 mV';
+      if (detailTemp)      detailTemp.textContent      = `${(29.1 + Math.random() * 0.4).toFixed(1)} °C`;
       const hours = ((level / 100) * 8.2).toFixed(1);
       const h = Math.floor(hours);
       const m = Math.round((hours - h) * 60);
@@ -524,21 +596,84 @@ function initCpuEngine() {
   const benchmarkScoreSub = document.getElementById('benchmarkScoreSub');
   const benchStatusBadge = document.getElementById('benchStatusBadge');
 
+  const HAS_NATIVE_CPU = (typeof window.AndroidBridge !== 'undefined');
   const cores = navigator.hardwareConcurrency || 8;
-  const memory = navigator.deviceMemory || 8;
-  if (cpuCoreCount) cpuCoreCount.textContent = `${cores} Çekirdek`;
-  if (ramCapacity) ramCapacity.textContent = `${memory} GB`;
-  if (gridCpuCores) gridCpuCores.textContent = `${cores} Çekirdek`;
-  if (gridRam) gridRam.textContent = `${memory} GB RAM`;
+
+  if (HAS_NATIVE_CPU) {
+    // ── GERÇEK DEĞERLER: Native Android Bridge ──
+    try {
+      const cpu  = JSON.parse(window.AndroidBridge.getCpuData());
+      const ram  = JSON.parse(window.AndroidBridge.getRamData());
+      const stor = JSON.parse(window.AndroidBridge.getStorageData());
+      const dev  = JSON.parse(window.AndroidBridge.getDeviceInfo());
+
+      // CPU
+      const realCores = cpu.cores || cores;
+      const freqGhz   = cpu.max_freq_ghz ? `${cpu.max_freq_ghz} GHz` : '';
+      const abiStr    = cpu.abi || '';
+      if (cpuCoreCount) cpuCoreCount.textContent = `${realCores} Çekirdek${freqGhz ? ' · ' + freqGhz : ''}`;
+      if (gridCpuCores) gridCpuCores.textContent = `${realCores} Çekirdek`;
+
+      // CPU sıcaklığı
+      if (cpu.temperature) {
+        const cpuTempEl = document.getElementById('cpuTemperature');
+        if (cpuTempEl) cpuTempEl.textContent = `${cpu.temperature.toFixed(1)} °C`;
+      }
+
+      // RAM — gerçek
+      const totalGB = (ram.total_mb / 1024).toFixed(1);
+      const usedGB  = (ram.used_mb  / 1024).toFixed(1);
+      const freeGB  = (ram.avail_mb / 1024).toFixed(1);
+      if (ramCapacity) ramCapacity.textContent = `${totalGB} GB`;
+      if (gridRam) gridRam.textContent = `${totalGB} GB RAM`;
+
+      // RAM kullanım progress bar
+      const ramBarEl  = document.getElementById('ramProgressBar');
+      const ramUsedEl = document.getElementById('ramUsedText');
+      const ramFreeEl = document.getElementById('ramFreeText');
+      if (ramBarEl)  ramBarEl.style.width  = `${ram.used_pct}%`;
+      if (ramUsedEl) ramUsedEl.textContent = `Kullanılan: ${usedGB} GB / ${totalGB} GB`;
+      if (ramFreeEl) ramFreeEl.textContent = `${freeGB} GB Serbest RAM`;
+
+      // Depolama — gerçek
+      if (storageInfoText)  storageInfoText.textContent  = `Kullanılan: ${stor.used_gb} GB / ${stor.total_gb} GB`;
+      if (storageProgressBar) storageProgressBar.style.width = `${stor.used_pct}%`;
+      if (storageFreeText)  storageFreeText.textContent  = `${stor.free_gb} GB Kullanılabilir Boş Alan`;
+
+      // Cihaz bilgisi
+      const deviceLabelEl = document.getElementById('deviceModelLabel');
+      const androidVerEl  = document.getElementById('androidVersion');
+      const screenSizeEl  = document.getElementById('screenSizeInfo');
+      if (deviceLabelEl) deviceLabelEl.textContent = `${dev.manufacturer} ${dev.model}`;
+      if (androidVerEl)  androidVerEl.textContent  = `Android ${dev.android} (API ${dev.sdk})`;
+      if (screenSizeEl)  screenSizeEl.textContent  = `${dev.screen_w}×${dev.screen_h} · ${dev.dpi} dpi · ${dev.screen_inch}"`;
+
+    } catch(e) {
+      // Bridge hata → fallback
+      const memory = navigator.deviceMemory || 8;
+      if (cpuCoreCount) cpuCoreCount.textContent = `${cores} Çekirdek`;
+      if (ramCapacity)  ramCapacity.textContent  = `${memory} GB`;
+      if (gridCpuCores) gridCpuCores.textContent = `${cores} Çekirdek`;
+      if (gridRam)      gridRam.textContent      = `${memory} GB RAM`;
+    }
+  } else {
+    // ── FALLBACK: Web API (PWA / PC) ──
+    const memory = navigator.deviceMemory || 8;
+    if (cpuCoreCount) cpuCoreCount.textContent = `${cores} Çekirdek`;
+    if (ramCapacity)  ramCapacity.textContent  = `${memory} GB`;
+    if (gridCpuCores) gridCpuCores.textContent = `${cores} Çekirdek`;
+    if (gridRam)      gridRam.textContent      = `${memory} GB RAM`;
+  }
 
   if (navigator.storage && navigator.storage.estimate) {
     navigator.storage.estimate().then(estimate => {
-      const usedGB = (estimate.usage / (1024 * 1024 * 1024)).toFixed(1);
-      const quotaGB = (estimate.quota / (1024 * 1024 * 1024)).toFixed(0);
+      if (HAS_NATIVE_CPU) return; // native zaten doldurdu
+      const usedGB  = (estimate.usage / (1024*1024*1024)).toFixed(1);
+      const quotaGB = (estimate.quota / (1024*1024*1024)).toFixed(0);
       const percent = Math.min(100, Math.round((estimate.usage / estimate.quota) * 100));
-      if (storageInfoText) storageInfoText.textContent = `Kullanılan: ${usedGB} GB / ${quotaGB} GB`;
+      if (storageInfoText)    storageInfoText.textContent  = `Kullanılan: ${usedGB} GB / ${quotaGB} GB`;
       if (storageProgressBar) storageProgressBar.style.width = `${percent}%`;
-      if (storageFreeText) storageFreeText.textContent = `${(quotaGB - usedGB).toFixed(1)} GB Kullanılabilir Boş Alan`;
+      if (storageFreeText)    storageFreeText.textContent  = `${(quotaGB - usedGB).toFixed(1)} GB Kullanılabilir Boş Alan`;
     }).catch(() => {});
   }
 
