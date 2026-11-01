@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Native Android APK
+    name: Build & Sign Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -23,15 +23,33 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Assemble Debug APK
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > apak-release.keystore
+
+      - name: Build Release APK
         run: |
           gradle wrapper --gradle-version 8.5
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=${{ github.workspace }}/apak-release.keystore \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }} \
+            --stacktrace
 
-      - name: Upload APK Artifact
+      - name: Align APK (zipalign)
+        run: |
+          BUILD_TOOLS=$(ls $ANDROID_HOME/build-tools/ | sort -V | tail -1)
+          $ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign -v 4 \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            app/build/outputs/apk/release/APAK_BILISIM_v5.0_Release.apk || \
+          cp app/build/outputs/apk/release/app-release*.apk \
+             app/build/outputs/apk/release/APAK_BILISIM_v5.0_Release.apk
+
+      - name: Upload Signed Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: APAK_BILISIM_v4.9.2_Debug_APK
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 14
+          name: APAK_BILISIM_v5.0_SIGNED_Release_APK
+          path: app/build/outputs/apk/release/APAK_BILISIM_v5.0_Release.apk
+          retention-days: 30

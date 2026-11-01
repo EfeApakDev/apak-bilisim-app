@@ -10,16 +10,26 @@ android {
         applicationId "com.apak.bilisim"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "4.9.2"
+        versionCode 5
+        versionName "5.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            // Değerler CI'dan -P parametresiyle geliyor; lokal build için fallback debug
+            storeFile = file(findProperty('android.injected.signing.store.file') ?: "${System.getProperty('user.home')}/.android/debug.keystore")
+            storePassword = findProperty('android.injected.signing.store.password') ?: 'android'
+            keyAlias = findProperty('android.injected.signing.key.alias') ?: 'androiddebugkey'
+            keyPassword = findProperty('android.injected.signing.key.password') ?: 'android'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
         debug {
             signingConfig signingConfigs.debug
