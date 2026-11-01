@@ -87,41 +87,49 @@
     <!-- ==================== 3. ANA SAYFA (5 KARE KATEGORİ) ==================== -->
     <main id="viewHome" class="view-screen active">
 
-      <!-- HERO: DEVICE CARE STATUS -->
+      <!-- HERO: DEVICE CARE STATUS & HEALTH CARD -->
       <div class="hero-care-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #065F46; background: #ECFDF5; padding: 4px 10px; border-radius: 9999px; margin-bottom: 8px;">
-              ● SİSTEM DURUMU: KUSURSUZ
+              ● APAK SİSTEM SAĞLIK KARNESİ
             </span>
             <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">
-              Cihazınız Optimize
+              Cihaz Teşhis Raporu
             </h2>
             <p style="font-size: 13px; color: #64748B; margin-top: 2px;" id="heroDeviceSummary">
-              Tüm donanım ve sensörler aktif çalışıyor.
+              Genel Durum: %94 Sağlıklı • Tüm donanımlar aktif
             </p>
           </div>
           
-          <div class="care-score-ring">
+          <div class="care-score-ring" id="btnOpenHealthModal" style="cursor: pointer;" title="Sağlık Karnesini Aç">
             <svg width="72" height="72" viewBox="0 0 72 72" style="transform: rotate(-90deg);">
               <circle cx="36" cy="36" r="30" stroke="#F1F5F9" stroke-width="6" fill="none" />
-              <circle id="careCircleProgress" cx="36" cy="36" r="30" stroke="#0066FF" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="10" fill="none" style="transition: stroke-dashoffset 0.8s ease;" />
+              <circle id="careCircleProgress" cx="36" cy="36" r="30" stroke="#0066FF" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="15" fill="none" style="transition: stroke-dashoffset 0.8s ease;" />
             </svg>
             <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
-              <span class="care-score-val" id="careScoreText">99</span>
+              <span class="care-score-val" id="careScoreText">94</span>
             </div>
           </div>
         </div>
 
-        <div style="margin-top: 18px; display: flex; gap: 10px;">
-          <button id="btnQuickOptimize" class="btn-action-primary" style="height: 42px; font-size: 13px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- HIZLI AKSİYON BUTONLARI -->
+        <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button id="btnQuickOptimize" class="btn-action-primary" style="height: 42px; font-size: 12px; font-weight: 700;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
             </svg>
-            Şimdi Optimize Et
+            ⚡ Hızlı RAM Temizle
           </button>
-          <button id="btnQuickScan" class="btn-action-secondary" style="height: 42px; font-size: 13px; width: auto; padding: 0 16px;">
-            Hızlı Teşhis
+          <button id="btnQuickRescueHome" class="btn-action-secondary" style="height: 42px; font-size: 12px; font-weight: 700; background: #EFF6FF; color: #0066FF; border-color: #BFDBFE;">
+            🔊 Sesi Kurtar (%100)
+          </button>
+        </div>
+
+        <div style="margin-top: 8px;">
+          <button class="btn-action-secondary" data-open="viewHealth" style="width: 100%; height: 38px; font-size: 12px; font-weight: 700; background: #F8FAFC; color: #0F172A; border-color: #E2E8F0; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <span>📋 Ayrıntılı Sağlık Karnesi &amp; WhatsApp Raporu</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         </div>
       </div>
@@ -129,10 +137,10 @@
       <!-- SECTION TITLE -->
       <div class="section-headline">
         <span>KONTROL VE DONANIM MODÜLLERİ</span>
-        <span style="font-size: 11px; color: #0066FF; font-weight: 700;">5 KATEGORİ</span>
+        <span style="font-size: 11px; color: #0066FF; font-weight: 700;">11 MODÜL</span>
       </div>
 
-      <!-- 5 ANA KARE / KATEGORİ KARTLARI (GRID) -->
+      <!-- KATEGORİ KARTLARI (GRID) -->
       <div class="category-grid">
 
         <!-- KARE 1: ŞARJ & GÜÇ İSTASYONU -->
@@ -147,7 +155,7 @@
           </div>
           <div>
             <div class="card-title">Şarj &amp; Güç</div>
-            <div class="card-desc">Canlı inip çıkan mA akımı, kalan dolum/deşarj süresi</div>
+            <div class="card-desc">Canlı mA akımı, donanım voltajı, dolum tahmini</div>
             <div class="card-metric-tag" id="gridBatteryTag" style="background: #ECFDF5; color: #065F46;">
               <span id="gridBatteryRate">+4,820 mA</span> • <span id="gridBatteryPercent">--%</span>
             </div>
@@ -165,7 +173,7 @@
           </div>
           <div>
             <div class="card-title">GPU-Z &amp; Ekran</div>
-            <div class="card-desc">Gerçek GPU yongası, canlı 120Hz ölçer, ölü piksel testi</div>
+            <div class="card-desc">Gerçek GPU yongası, canlı 120Hz ölçer, ölü piksel</div>
             <div class="card-metric-tag" style="background: #EFF6FF; color: #1D4ED8;">
               <span id="gridGpuName">Adreno / Mali</span> • <span id="gridFpsTag">120 Hz</span>
             </div>
@@ -183,7 +191,7 @@
           </div>
           <div>
             <div class="card-title">İşlemci &amp; RAM</div>
-            <div class="card-desc">Çekirdekler, bellek kapasitesi, CPU benchmark</div>
+            <div class="card-desc">Çekirdekler, bellek kapasitesi, 5 sn CPU testi</div>
             <div class="card-metric-tag" style="background: #EEF2FF; color: #4338CA;">
               <span id="gridCpuCores">8 Çekirdek</span> • <span id="gridRam">RAM Analizi</span>
             </div>
@@ -199,14 +207,126 @@
           </div>
           <div>
             <div class="card-title">Biyo &amp; Nabız</div>
-            <div class="card-desc">Gerçek parmak algılamalı kamera nabız ölçer &amp; EKG</div>
+            <div class="card-desc">Gerçek parmak algılamalı kamera nabız &amp; EKG</div>
             <div class="card-metric-tag" style="background: #FFF1F2; color: #991B1B;">
               <span id="gridBpmTag">Parmak Bekleniyor</span>
             </div>
           </div>
         </div>
 
-        <!-- KARE 5: AKUSTİK & DONANIM TEŞHİS (GENİŞ KART) -->
+        <!-- KARE 5: YAŞLI / DEDE KURTARMA (ÖZEL KART) -->
+        <div class="category-card" data-open="viewElder" style="border: 1.5px solid #BFDBFE;">
+          <div class="card-icon-bubble" style="background: #EFF6FF; color: #0066FF;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title" style="color: #0066FF;">Dede Kurtarma Modu</div>
+            <div class="card-desc">Tek tıkla zil sesi %100, medya sesi açma, ayar düzeltme</div>
+            <div class="card-metric-tag" style="background: #EFF6FF; color: #1D4ED8;">
+              <span>Acil Ses Kurtarma</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 6: WI-FI & AĞ SİNYAL RADARI -->
+        <div class="category-card" data-open="viewNetwork">
+          <div class="card-icon-bubble" style="background: #F0FDF4; color: #16A34A;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+              <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+              <line x1="12" x2="12.01" y1="20" y2="20"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Wi-Fi &amp; Ağ Radarı</div>
+            <div class="card-desc">Canlı dBm sinyal avcısı, Google ping ve IP testi</div>
+            <div class="card-metric-tag" style="background: #F0FDF4; color: #15803D;">
+              <span id="gridWifiSignalTag">-52 dBm (İyi)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 7: AHİZE TOZ TAHLİYESİ & YANKI TESTİ -->
+        <div class="category-card" data-open="viewAcousticPro">
+          <div class="card-icon-bubble" style="background: #FAF5FF; color: #9333EA;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" x2="12" y1="19" y2="23"/>
+              <line x1="8" x2="16" y1="23" y2="23"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Ahize Toz &amp; Yankı</div>
+            <div class="card-desc">Üst ahize ultrasonik toz dökücü &amp; mikrofon testi</div>
+            <div class="card-metric-tag" style="background: #FAF5FF; color: #7E22CE;">
+              <span>6000Hz Toz Tahliyesi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 8: WHATSAPP & ÇÖP TEMİZLEYİCİ -->
+        <div class="category-card" data-open="viewCleaner">
+          <div class="card-icon-bubble" style="background: #FEF2F2; color: #DC2626;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18"/>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+              <line x1="10" x2="10" y1="11" y2="17"/>
+              <line x1="14" x2="14" y1="11" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Önbellek &amp; Çöp</div>
+            <div class="card-desc">Gereksiz medya tespiti, tek tıkla RAM ve hafıza açma</div>
+            <div class="card-metric-tag" style="background: #FEF2F2; color: #B91C1C;">
+              <span id="gridTrashTag">~2.8 GB Temizlenebilir</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 9: HAYALET DOKUNMA & KÖR NOKTA -->
+        <div class="category-card" data-open="viewGhostTouch">
+          <div class="card-icon-bubble" style="background: #F0FDF4; color: #059669;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Kör Nokta Testi</div>
+            <div class="card-desc">Ekranın basmayan yerlerini ve hayalet dokunmayı bul</div>
+            <div class="card-metric-tag" style="background: #F0FDF4; color: #047857;">
+              <span>60 Karelik Dokunma Izgarası</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 10: BÜYÜTEÇ & İLAÇ OKUMA -->
+        <div class="category-card" data-open="viewMagnifier">
+          <div class="card-icon-bubble" style="background: #FDF4FF; color: #C026D3;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" x2="16.65" y1="21" y2="16.65"/>
+              <line x1="11" x2="11" y1="8" y2="14"/>
+              <line x1="8" x2="14" y1="11" y2="11"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Büyüteç &amp; İlaç Oku</div>
+            <div class="card-desc">Flaşlı 8x dijital zoom, yüksek kontrastlı prospektüs modu</div>
+            <div class="card-metric-tag" style="background: #FDF4FF; color: #A21CAF;">
+              <span>Yüksek Kontrast Fenerli</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 11: AKUSTİK & DONANIM TEŞHİS (GENİŞ KART) -->
         <div class="category-card category-card-wide" data-open="viewDiagnostics">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div class="card-icon-bubble" style="background: #FFFBEB; color: #F59E0B;">
@@ -221,8 +341,8 @@
             </span>
           </div>
           <div>
-            <div class="card-title" style="font-size: 17px;">Akustik &amp; Donanım Teşhisi</div>
-            <div class="card-desc">Durdurulabilir 165Hz Su Tahliyesi, Gerçek Hassas Desibel (dB) Metre, Kapatılabilir Flaşör &amp; Çakar, Sismograf ve Çoklu Dokunmatik.</div>
+            <div class="card-title" style="font-size: 17px;">Hoparlör Su Tahliye &amp; dB Metre</div>
+            <div class="card-desc">Durdurulabilir 165Hz Su Tahliyesi, Gerçek Hassas Desibel (dB) Metre, Kapatılabilir Flaşör &amp; Sismograf.</div>
             <div class="card-metric-tag" style="background: #FFFBEB; color: #92400E; margin-top: 10px;">
               <span>165Hz Su Tahliyesi</span> • <span>Hassas dB Metre</span> • <span>Flaş Kapatma</span>
             </div>
@@ -880,6 +1000,421 @@
         </div>
       </div>
 
+    </section>
+
+    <!-- ==================== 6. APAK SİSTEM SAĞLIK KARNESİ & WHATSAPP RAPORU ==================== -->
+    <section id="viewHealth" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Sistem Sağlık Karnesi</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <!-- MAIN SCORE DISPLAY -->
+      <div class="white-island-card" style="text-align: center; padding: 24px 16px;">
+        <span class="island-badge" style="background: #ECFDF5; color: #065F46; font-size: 11px;">
+          ● TEŞHİS RAPORU TAMAMLANDI
+        </span>
+        <div style="margin: 16px auto; width: 110px; height: 110px; position: relative;">
+          <svg width="110" height="110" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+            <circle cx="50" cy="50" r="42" stroke="#F1F5F9" stroke-width="8" fill="none" />
+            <circle id="reportScoreCircle" cx="50" cy="50" r="42" stroke="#10B981" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="20" fill="none" style="transition: stroke-dashoffset 1s ease;" />
+          </svg>
+          <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <span id="reportScoreNumber" style="font-size: 32px; font-weight: 800; color: #0F172A; font-family: var(--font-mono);">94</span>
+            <span style="font-size: 10px; color: #64748B; font-weight: 700; margin-top: -4px;">/ 100</span>
+          </div>
+        </div>
+        <h3 id="reportScoreTitle" style="font-size: 18px; font-weight: 800; color: #0F172A;">Mükemmel Durumda</h3>
+        <p id="reportScoreSummary" style="font-size: 13px; color: #64748B; margin-top: 4px; max-width: 320px; margin-left: auto; margin-right: auto;">
+          Donanım, batarya ve bellek optimize. Ciddi bir yavaşlama veya arıza tespit edilmedi.
+        </p>
+
+        <!-- WHATSAPP SHARE BUTTON -->
+        <button id="btnShareWhatsApp" class="btn-action-primary" style="margin-top: 18px; height: 48px; background: #25D366; font-size: 14px; font-weight: 800; border-color: #22C55E;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          📲 WhatsApp ile APAK Raporu Gönder
+        </button>
+      </div>
+
+      <!-- HEALTH CATEGORY BREAKDOWN -->
+      <div class="white-island-card">
+        <div class="island-title" style="margin-bottom: 12px;">
+          <span>4 Temel Donanım Notu</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #F8FAFC; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">🔋</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Pil Sağlığı &amp; Döngü</div>
+                <div style="font-size: 11px; color: #64748B;" id="reportBatterySub">Gerçek mAh donanım akımı</div>
+              </div>
+            </div>
+            <span class="island-badge" id="reportBatteryBadge" style="background: #ECFDF5; color: #065F46;">%91 (İYİ)</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #F8FAFC; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">⚡</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Bellek (RAM) Yükü</div>
+                <div style="font-size: 11px; color: #64748B;" id="reportRamSub">Kullanılan bellek oranı</div>
+              </div>
+            </div>
+            <span class="island-badge" id="reportRamBadge" style="background: #EFF6FF; color: #1D4ED8;">%45 (TEMİZ)</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #F8FAFC; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">💾</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Depolama &amp; Medya</div>
+                <div style="font-size: 11px; color: #64748B;" id="reportStorageSub">Dahili hafıza boşluk</div>
+              </div>
+            </div>
+            <span class="island-badge" id="reportStorageBadge" style="background: #ECFDF5; color: #065F46;">YETERLİ</span>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #F8FAFC; border-radius: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">📡</span>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #0F172A;">İnternet &amp; Sinyal</div>
+                <div style="font-size: 11px; color: #64748B;" id="reportNetSub">Wi-Fi / Mobil şebeke gecikmesi</div>
+              </div>
+            </div>
+            <span class="island-badge" id="reportNetBadge" style="background: #ECFDF5; color: #065F46;">HIZLI</span>
+          </div>
+        </div>
+
+        <button id="btnReScanHealth" class="btn-action-secondary" style="margin-top: 14px; height: 42px; font-size: 13px; font-weight: 700;">
+          🔄 Yeniden Derin Tarama Başlat
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 7. DEDE / YAŞLI KURTARMA İSTASYONU ==================== -->
+    <section id="viewElder" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Yaşlı / Dede Kurtarma</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <div class="white-island-card" style="text-align: center; border: 2px solid #BFDBFE;">
+        <span class="island-badge" style="background: #EFF6FF; color: #0066FF; font-size: 11px;">
+          TEK TUŞLA TAMİR MODU
+        </span>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0F172A; margin-top: 12px;">
+          Ses &amp; Ayar Kurtarıcı
+        </h3>
+        <p style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 20px;">
+          Yaşlıların yanlışlıkla kıstığı zil sesini, medya sesini %100 yapar, sessiz modu kapatır ve ekranı aydınlatır.
+        </p>
+
+        <!-- GIANT RESCUE BUTTON -->
+        <button id="btnElderRescueBig" class="btn-action-primary" style="height: 56px; font-size: 16px; font-weight: 800; background: #0066FF; box-shadow: 0 10px 25px -5px rgba(0, 102, 255, 0.4);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+          🔊 TÜM SESLERİ %100 YAP
+        </button>
+        <div id="elderRescueStatus" style="font-size: 12px; color: #10B981; font-weight: 700; margin-top: 10px; display: none;">
+          ✓ Zil, Medya ve Çağrı Sesi Maksimuma Alındı!
+        </div>
+      </div>
+
+      <!-- QUICK FIX CARDS -->
+      <div class="white-island-card">
+        <div class="island-title" style="margin-bottom: 12px;">
+          <span>Hızlı Yaşlı Çözümleri</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button id="btnOpenStorageCleanElder" class="btn-action-secondary" style="height: 48px; font-size: 12px; font-weight: 700; padding: 4px 8px;">
+            📂 Hafıza Temizliğine Git
+          </button>
+          <button id="btnElderTorch" class="btn-action-secondary" style="height: 48px; font-size: 12px; font-weight: 700; padding: 4px 8px;">
+            🔦 Feneri Yak
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 8. CANLI WI-FI & AĞ SİNYAL RADARI ==================== -->
+    <section id="viewNetwork" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Wi-Fi &amp; Ağ Radarı</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <!-- DBM SIGNAL GAUGE -->
+      <div class="white-island-card" style="text-align: center;">
+        <span class="island-badge" id="netSignalQualityBadge" style="background: #ECFDF5; color: #065F46;">
+          ● MÜKEMMEL SİNYAL
+        </span>
+
+        <div style="margin: 20px 0;">
+          <div style="font-size: 44px; font-weight: 800; color: #0F172A; font-family: var(--font-mono);" id="netDbmValue">
+            -48 <span style="font-size: 20px; font-weight: 600; color: #64748B;">dBm</span>
+          </div>
+          <div style="font-size: 13px; color: #64748B; font-weight: 600;" id="netSsidName">
+            Bağlı Ağ: Wi-Fi İnternet
+          </div>
+        </div>
+
+        <!-- SIGNAL BAR -->
+        <div style="height: 10px; background: #F1F5F9; border-radius: 9999px; overflow: hidden; margin-bottom: 12px;">
+          <div id="netSignalProgressBar" style="height: 100%; width: 85%; background: #10B981; border-radius: 9999px; transition: width 0.5s ease;"></div>
+        </div>
+        <p style="font-size: 11px; color: #94A3B8;">
+          -30 dBm (En Güçlü) • -65 dBm (İyi) • -85 dBm (Kopma Sınırı)
+        </p>
+      </div>
+
+      <!-- NETWORK TELEMETRY GRID -->
+      <div class="white-island-card">
+        <div class="island-title" style="margin-bottom: 12px;">
+          <span>Ağ Gecikmesi ve Hız</span>
+        </div>
+
+        <div class="metrics-row-2">
+          <div class="metric-well">
+            <span class="metric-label">GOOGLE DNS PİNG</span>
+            <span class="metric-value" id="netPingValue" style="color: #10B981;">24 ms</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">LINK HIZI</span>
+            <span class="metric-value" id="netLinkSpeed">866 Mbps</span>
+          </div>
+        </div>
+
+        <div class="metrics-row-2" style="margin-top: 10px;">
+          <div class="metric-well">
+            <span class="metric-label">YEREL CİHAZ IP</span>
+            <span class="metric-value" id="netLocalIp" style="font-size: 13px;">192.168.1.35</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">FREKANS BANDI</span>
+            <span class="metric-value" id="netFrequency">5.0 GHz (AC)</span>
+          </div>
+        </div>
+
+        <button id="btnPingTest" class="btn-action-primary" style="margin-top: 14px; height: 42px; font-size: 13px; font-weight: 700;">
+          ⚡ Anlık Ping &amp; Hız Testi Yap
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 9. AHİZE TOZ TAHLİYESİ & MİKROFON YANKI ==================== -->
+    <section id="viewAcousticPro" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Ahize Toz &amp; Yankı Testi</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <!-- EARPIECE DUST EXPULSION -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333EA" stroke-width="2.2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            </svg>
+            <span>Üst Ahize Ultrasonik Toz Çalkalama</span>
+          </div>
+          <span class="island-badge" id="badgeEarpieceDust" style="background: #FAF5FF; color: #7E22CE;">HAZIR</span>
+        </div>
+
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 12px;">
+          Telefonun üst ahize ızgarasındaki toz ve pamukları dökmek için 4000Hz - 8000Hz arası darbeli ultrasonik frekans üretir.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button id="btnStartEarpieceDust" class="btn-action-primary" style="height: 44px; font-size: 13px; font-weight: 700; background: #9333EA; border-color: #7E22CE;">
+            🌪️ Toz Tahliyesi Başlat
+          </button>
+          <button id="btnStopEarpieceDust" class="btn-action-secondary" style="height: 44px; font-size: 13px; font-weight: 700; color: #EF4444; border-color: #FCA5A5;">
+            🛑 Durdur
+          </button>
+        </div>
+      </div>
+
+      <!-- MIC LOOPBACK ECHO TEST -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+            <span>Mikrofon Canlı Yankı (Loopback) Testi</span>
+          </div>
+          <span class="island-badge" id="badgeLoopback" style="background: #EFF6FF; color: #1D4ED8;">KAPALI</span>
+        </div>
+
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 12px;">
+          "Alo sesim geliyor mu?" testi. Mikrofona konuştuğunuzda sesiniz 0.2 saniye gecikmeyle hoparlörden çalınır, donanım sağlamlığı teyit edilir.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button id="btnStartLoopback" class="btn-action-primary" style="height: 44px; font-size: 13px; font-weight: 700;">
+            🎙️ Yankı Testini Aç
+          </button>
+          <button id="btnStopLoopback" class="btn-action-secondary" style="height: 44px; font-size: 13px; font-weight: 700; color: #EF4444; border-color: #FCA5A5;">
+            🛑 Testi Bitir
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 10. WHATSAPP & ÖNBELLEK ÇÖP TEMİZLEYİCİ ==================== -->
+    <section id="viewCleaner" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Önbellek &amp; Çöp Temizleyici</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <div class="white-island-card" style="text-align: center;">
+        <span class="island-badge" style="background: #FEF2F2; color: #B91C1C;">
+          ● TAHMİNİ ÇÖP ANALİZİ
+        </span>
+
+        <div style="margin: 20px 0;">
+          <div style="font-size: 42px; font-weight: 800; color: #0F172A; font-family: var(--font-mono);" id="cleanerTrashSize">
+            3.4 <span style="font-size: 20px; font-weight: 600; color: #64748B;">GB</span>
+          </div>
+          <div style="font-size: 13px; color: #64748B; font-weight: 600;">
+            Gereksiz Önbellek, WhatsApp Videoları &amp; Geçici Dosyalar
+          </div>
+        </div>
+
+        <button id="btnDoQuickClean" class="btn-action-primary" style="height: 50px; font-size: 14px; font-weight: 800; background: #DC2626; border-color: #B91C1C;">
+          🗑️ Tek Tıkla Önbelleği Temizle
+        </button>
+        <div id="cleanSuccessMsg" style="font-size: 12px; color: #10B981; font-weight: 700; margin-top: 10px; display: none;">
+          ✓ Bellek ve Önbellek Başarıyla Boşaltıldı!
+        </div>
+      </div>
+
+      <div class="white-island-card">
+        <div class="island-title" style="margin-bottom: 8px;">
+          <span>Android Derin Hafıza Yöneticisi</span>
+        </div>
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 12px;">
+          Sistemin kendi derin temizlik motorunu açarak WhatsApp, indirilenler ve büyük videoları tek tıkla silebilirsiniz.
+        </p>
+        <button id="btnOpenSystemStorageDeep" class="btn-action-secondary" style="width: 100%; height: 44px; font-size: 13px; font-weight: 700;">
+          📂 Sistem Depolama Ayarlarını Aç
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 11. HAYALET DOKUNMA & KÖR NOKTA IZGARASI ==================== -->
+    <section id="viewGhostTouch" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Ekran Kör Nokta Izgarası</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <span>60 Karelik Dokunmatik Testi</span>
+          </div>
+          <span class="island-badge" id="ghostTouchScoreBadge" style="background: #EFF6FF; color: #1D4ED8;">0 / 60 (%0)</span>
+        </div>
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 10px;">
+          Parmağınızı ekranın her yerinde gezdirin. Dokunulan kareler yeşile döner. Basmayan veya hava yapan yerler kırmızı kalır.
+        </p>
+
+        <!-- INTERACTIVE TOUCH GRID CONTAINER -->
+        <div id="ghostGridBox" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; height: 320px; background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 6px; touch-action: none; user-select: none;">
+          <!-- JS dinamik olarak 60 hücre yerleştirecek -->
+        </div>
+
+        <button id="btnResetGhostGrid" class="btn-action-secondary" style="margin-top: 12px; width: 100%; height: 40px; font-size: 12px; font-weight: 700;">
+          🔄 Izgarayı Sıfırla
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 12. BÜYÜTEÇ & İLAÇ OKUMA MODU ==================== -->
+    <section id="viewMagnifier" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <span class="subpage-nav-title">Büyüteç &amp; İlaç Okuyucu</span>
+        <div style="width: 40px;"></div>
+      </div>
+
+      <div class="white-island-card" style="padding: 12px;">
+        <!-- VIEWFINDER VIDEO -->
+        <div style="position: relative; width: 100%; height: 340px; border-radius: 16px; overflow: hidden; background: #000;">
+          <video id="magnifierVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s ease, filter 0.2s ease;"></video>
+          <div id="magnifierTargetCross" style="position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 80px; height: 80px; border: 2px dashed rgba(255,255,255,0.7); border-radius: 12px;"></div>
+          </div>
+          <div id="magnifierZoomBadge" style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.7); color: #FFF; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px; font-family: var(--font-mono);">
+            ZOOM: 1.0x
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+          <button class="btn-action-secondary btn-zoom-level" data-zoom="1" style="height: 38px; font-size: 12px; font-weight: 800;">1x</button>
+          <button class="btn-action-secondary btn-zoom-level" data-zoom="2" style="height: 38px; font-size: 12px; font-weight: 800;">2x</button>
+          <button class="btn-action-secondary btn-zoom-level" data-zoom="4" style="height: 38px; font-size: 12px; font-weight: 800;">4x</button>
+          <button class="btn-action-secondary btn-zoom-level" data-zoom="8" style="height: 38px; font-size: 12px; font-weight: 800;">8x</button>
+        </div>
+
+        <div style="margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button id="btnToggleMagnifierTorch" class="btn-action-primary" style="height: 44px; font-size: 12px; font-weight: 700;">
+            🔦 Işığı Aç
+          </button>
+          <button id="btnToggleContrastMode" class="btn-action-secondary" style="height: 44px; font-size: 12px; font-weight: 700;">
+            👁️ Yüksek Kontrast (S/B)
+          </button>
+        </div>
+      </div>
     </section>
 
   </div>

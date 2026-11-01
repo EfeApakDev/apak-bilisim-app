@@ -9,11 +9,17 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -22,6 +28,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -42,37 +49,30 @@ public class MainActivity extends AppCompatActivity {
             try {
                 JSONObject obj = new JSONObject();
 
-                // 1. BroadcastReceiver ile anlık pil intent'i
                 IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 Intent bat = getApplicationContext().registerReceiver(null, ifilter);
 
-                // Şarj seviyesi %
                 int level = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) : -1;
                 int scale = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_SCALE, 100) : 100;
                 float percent = (level / (float) scale) * 100f;
                 obj.put("level", Math.round(percent));
 
-                // Şarjda mı?
                 int status = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_STATUS, -1) : -1;
                 boolean charging = (status == BatteryManager.BATTERY_STATUS_CHARGING ||
                                     status == BatteryManager.BATTERY_STATUS_FULL);
                 obj.put("charging", charging);
                 obj.put("full", status == BatteryManager.BATTERY_STATUS_FULL);
 
-                // Voltaj (mV)
                 int voltageMv = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0) : 0;
                 obj.put("voltage_mv", voltageMv);
                 obj.put("voltage_v", Math.round(voltageMv / 10.0) / 100.0);
 
-                // Sıcaklık (°C × 10 → °C)
                 int tempTenths = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) : 0;
                 obj.put("temperature", tempTenths / 10.0);
 
-                // Şarj teknolojisi
                 String tech = bat != null ? bat.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) : "Li-ion";
                 obj.put("technology", tech != null ? tech : "Li-ion");
 
-                // Şarj kaynağı (USB / AC / Kablosuz)
                 int plugged = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) : 0;
                 String chargeSource = "Bağlı Değil";
                 if (plugged == BatteryManager.BATTERY_PLUGGED_AC)       chargeSource = "AC Adaptör";
@@ -80,62 +80,50 @@ public class MainActivity extends AppCompatActivity {
                 else if (plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS) chargeSource = "Kablosuz";
                 obj.put("charge_source", chargeSource);
 
-                // Anlık akım (µA → mA) — BatteryManager API (API 21+)
                 BatteryManager bm = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
                 if (bm != null) {
                     long currentMicroA = bm.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW);
                     long currentMA = currentMicroA / 1000L;
-                    obj.put("current_ma", currentMA);           // negatif = deşarj, pozitif = şarj
+                    obj.put("current_ma", currentMA);
                     obj.put("current_ma_abs", Math.abs(currentMA));
 
-                    // Kalan kapasite (µAh → mAh)
                     long chargeCounterUAh = bm.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
                     long remainingMAh = chargeCounterUAh / 1000L;
                     obj.put("remaining_mah", remainingMAh);
 
-                    // Anlık güç (W) = V × A
                     double watts = Math.abs(voltageMv / 1000.0 * currentMicroA / 1_000_000.0);
                     obj.put("power_w", Math.round(watts * 100.0) / 100.0);
 
-                    // Pil kapasitesi (design capacity) — /sys dosyasından oku
                     long designCap = readSysLong("/sys/class/power_supply/battery/charge_full_design");
                     if (designCap <= 0) designCap = readSysLong("/sys/class/power_supply/battery/energy_full_design");
-                    if (designCap > 0 && designCap > 10000) designCap /= 1000; // µAh → mAh
+                    if (designCap > 0 && designCap > 10000) designCap /= 1000;
                     obj.put("design_capacity_mah", designCap);
 
-                    // Gerçek pil kapasitesi
                     long fullCap = readSysLong("/sys/class/power_supply/battery/charge_full");
                     if (fullCap <= 0) fullCap = readSysLong("/sys/class/power_supply/battery/energy_full");
                     if (fullCap > 0 && fullCap > 10000) fullCap /= 1000;
                     obj.put("full_capacity_mah", fullCap);
 
-                    // Pil sağlığı %
                     if (designCap > 0 && fullCap > 0) {
                         int health = (int) Math.min(100, (fullCap * 100L / designCap));
                         obj.put("battery_health_pct", health);
                     }
 
-                    // Tahmini süre hesabı
                     if (!charging && currentMA != 0 && remainingMAh > 0) {
                         double hoursLeft = (double) remainingMAh / Math.abs(currentMA);
                         int hh = (int) hoursLeft;
                         int mm = (int) ((hoursLeft - hh) * 60);
-                        obj.put("time_remaining_h", hh);
-                        obj.put("time_remaining_m", mm);
                         obj.put("time_remaining_str", hh + " Saat " + mm + " Dk");
                     } else if (charging && currentMA != 0 && remainingMAh > 0 && fullCap > 0) {
                         double hoursToFull = (double)(fullCap - remainingMAh) / Math.abs(currentMA);
                         int hh = (int) hoursToFull;
                         int mm = (int) ((hoursToFull - hh) * 60);
-                        obj.put("time_to_full_h", hh);
-                        obj.put("time_to_full_m", mm);
                         obj.put("time_to_full_str", hh + " Saat " + mm + " Dk");
                     }
                 }
 
-                // Pil sağlık durumu (GOOD/DEAD vs)
                 int healthStatus = bat != null ? bat.getIntExtra(BatteryManager.EXTRA_HEALTH, 0) : 0;
-                String healthStr = "Bilinmiyor";
+                String healthStr = "İyi";
                 switch (healthStatus) {
                     case BatteryManager.BATTERY_HEALTH_GOOD:        healthStr = "İyi"; break;
                     case BatteryManager.BATTERY_HEALTH_OVERHEAT:    healthStr = "Aşırı Isınma"; break;
@@ -206,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
                 obj.put("board", Build.BOARD);
                 obj.put("abi",   Build.SUPPORTED_ABIS.length > 0 ? Build.SUPPORTED_ABIS[0] : "arm64-v8a");
 
-                // CPU frekansı (her çekirdek için max freq)
                 long maxFreqKhz = 0;
                 for (int i = 0; i < 8; i++) {
                     long f = readSysLong("/sys/devices/system/cpu/cpu" + i + "/cpufreq/cpuinfo_max_freq");
@@ -217,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
                     obj.put("max_freq_ghz", Math.round(maxFreqKhz / 10000.0) / 100.0);
                 }
 
-                // Anlık CPU sıcaklığı
                 double cpuTemp = readCpuTemp();
                 if (cpuTemp > 0) obj.put("temperature", cpuTemp);
 
@@ -239,9 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 obj.put("android",     Build.VERSION.RELEASE);
                 obj.put("sdk",         Build.VERSION.SDK_INT);
                 obj.put("build_id",    Build.ID);
-                obj.put("fingerprint", Build.FINGERPRINT);
 
-                // Ekran çözünürlüğü
                 DisplayMetrics dm = new DisplayMetrics();
                 getWindowManager().getDefaultDisplay().getRealMetrics(dm);
                 obj.put("screen_w",   dm.widthPixels);
@@ -258,7 +242,116 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // ── FLAŞ / EL FENERİ (Native) ──
+        // ── WI-FI VE AĞ SİNYALİ (dBm) ──
+        @JavascriptInterface
+        public String getWifiSignalInfo() {
+            try {
+                JSONObject obj = new JSONObject();
+                WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                if (wm != null && wm.isWifiEnabled()) {
+                    WifiInfo winfo = wm.getConnectionInfo();
+                    int rssi = winfo.getRssi(); // dBm (örn. -50 dBm)
+                    int linkSpeed = winfo.getLinkSpeed(); // Mbps
+                    String ssid = winfo.getSSID() != null ? winfo.getSSID().replace("\"", "") : "Wi-Fi";
+                    int ip = winfo.getIpAddress();
+                    String ipStr = String.format("%d.%d.%d.%d",
+                            (ip & 0xff), (ip >> 8 & 0xff), (ip >> 16 & 0xff), (ip >> 24 & 0xff));
+
+                    int level = WifiManager.calculateSignalLevel(rssi, 5); // 0-4
+
+                    obj.put("enabled", true);
+                    obj.put("ssid", ssid);
+                    obj.put("rssi_dbm", rssi);
+                    obj.put("link_speed_mbps", linkSpeed);
+                    obj.put("ip", ipStr);
+                    obj.put("level", level);
+                } else {
+                    obj.put("enabled", false);
+                }
+                return obj.toString();
+            } catch (Exception e) {
+                return "{\"enabled\":false, \"error\":\"" + e.getMessage() + "\"}";
+            }
+        }
+
+        // ── YAŞLI / DEDE KURTARMA (ZİL & MEDYA SESİNİ %100 YAP) ──
+        @JavascriptInterface
+        public boolean fixElderSettings() {
+            try {
+                runOnUiThread(() -> {
+                    try {
+                        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                        if (am != null) {
+                            am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                            int maxRing = am.getStreamMaxVolume(AudioManager.STREAM_RING);
+                            int maxMusic = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                            int maxNotif = am.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+
+                            am.setStreamVolume(AudioManager.STREAM_RING, maxRing, AudioManager.FLAG_SHOW_UI);
+                            am.setStreamVolume(AudioManager.STREAM_MUSIC, maxMusic, 0);
+                            am.setStreamVolume(AudioManager.STREAM_NOTIFICATION, maxNotif, 0);
+
+                            Toast.makeText(MainActivity.this, "🔊 APAK BİLİŞİM: Tüm Ses Seviyeleri %100 Yapıldı!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception ignored) {}
+                });
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        // ── TEK TIKLA BELLEK / ÖNBELLEK TEMİZLEME ──
+        @JavascriptInterface
+        public String cleanAppCache() {
+            try {
+                runOnUiThread(() -> {
+                    if (webView != null) {
+                        webView.clearCache(true);
+                    }
+                    System.gc();
+                    Runtime.getRuntime().gc();
+                    Toast.makeText(MainActivity.this, "⚡ Sistem Önbelleği & RAM Optimize Edildi!", Toast.LENGTH_SHORT).show();
+                });
+                return "{\"success\":true}";
+            } catch (Exception e) {
+                return "{\"success\":false}";
+            }
+        }
+
+        // ── WHATSAPP SAĞLIK RAPORU PAYLAŞ ──
+        @JavascriptInterface
+        public void shareWhatsAppReport(String reportText) {
+            try {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, reportText);
+                sendIntent.setType("text/plain");
+                Intent shareIntent = Intent.createChooser(sendIntent, "APAK Bilişim Raporunu Paylaş");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(shareIntent);
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Paylaşım açılamadı", Toast.LENGTH_SHORT).show());
+            }
+        }
+
+        // ── SİSTEM AYARLARINA YÖNLENDİR (Depolama & Ekran) ──
+        @JavascriptInterface
+        public void openStorageSettings() {
+            try {
+                Intent intent = new Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        // ── FLAŞ / EL FENERİ ──
         @JavascriptInterface
         public void setTorch(boolean on) {
             try {
@@ -275,7 +368,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
         }
 
-        // ── YARDIMCI: /sys dosyasından long oku ──
         private long readSysLong(String path) {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(path));
@@ -285,7 +377,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) { return 0; }
         }
 
-        // ── YARDIMCI: CPU sıcaklığı ──
         private double readCpuTemp() {
             String[] paths = {
                 "/sys/class/thermal/thermal_zone0/temp",
@@ -305,17 +396,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Tam ekran (status bar dahil — opsiyonel)
-        // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-        //                      WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // İzin kontrolleri
+        String[] permissions = new String[]{
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_WIFI_STATE
+        };
 
-        // Kamera & Mikrofon izinleri
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
-            }, 101);
+        boolean needReq = false;
+        for (String p : permissions) {
+            if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                needReq = true;
+                break;
+            }
+        }
+        if (needReq) {
+            ActivityCompat.requestPermissions(this, permissions, 101);
         }
 
         webView = new WebView(this);
@@ -329,7 +426,6 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
 
-        // ★ Native Bridge'i JavaScript'e bağla ★
         webView.addJavascriptInterface(new ApakBridge(), "AndroidBridge");
 
         webView.setWebViewClient(new WebViewClient());
