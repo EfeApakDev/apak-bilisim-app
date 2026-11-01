@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>APAK BİLİŞİM - Cihaz Bakım & Donanım Yönetimi</title>
+  <meta name="description" content="APAK BİLİŞİM Resmi Cihaz Bakım, Donanım Teşhis, Şarj ve Telemetri Sistemi" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- ==================== 1. INTRO / AÇILIŞ EKRANI ==================== -->
+  <div id="introScreen">
+    <div style="height: 40px;"></div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+      <div class="intro-logo-container">
+        <!-- Modern Clean Vector APAK Shield Emblem -->
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+
+      <h1 style="font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: #0F172A; margin-top: 24px; margin-bottom: 6px;">
+        APAK BİLİŞİM
+      </h1>
+      <p style="font-size: 13px; font-weight: 600; color: #0066FF; letter-spacing: 0.05em; text-transform: uppercase;">
+        Cihaz Bakım &amp; Donanım Sistemi
+      </p>
+      <p style="font-size: 13px; color: #64748B; margin-top: 8px; max-width: 280px;">
+        Telemetri, batarya dinamiği, ekran ve donanım kontrol platformu.
+      </p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 16px;">
+      <div class="intro-bar-loader">
+        <div class="intro-bar-fill"></div>
+      </div>
+      <button id="btnSkipIntro" class="btn-action-primary" style="max-width: 260px; height: 46px; font-size: 14px;">
+        Sisteme Giriş Yap
+      </button>
+      <span style="font-size: 11px; color: #94A3B8; font-weight: 500;">Sürüm v4.9.2 • Kurumsal Lisans</span>
+    </div>
+  </div>
+
+  <!-- ==================== 2. APP SHELL ==================== -->
+  <div class="app-container">
+
+    <!-- TOP APP BAR -->
+    <header class="top-header">
+      <div class="brand-badge">
+        <div class="brand-icon-mini">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">APAK BİLİŞİM</div>
+          <div class="brand-sub">DONANIM YÖNETİMİ</div>
+        </div>
+      </div>
+
+      <!-- Quick Telemetry Badge -->
+      <div class="header-status-pill">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981;" id="headerDot"></span>
+          <span style="font-size: 12px; font-weight: 700; color: #0F172A; font-family: var(--font-mono);" id="headerBatteryLevel">--%</span>
+        </div>
+        <div style="width: 1px; height: 12px; background: #E2E8F0;"></div>
+        <div style="font-size: 12px; font-weight: 700; color: #0066FF; font-family: var(--font-mono);" id="headerFps">120 Hz</div>
+      </div>
+    </header>
+
+    <!-- ==================== 3. ANA SAYFA (5 KARE KATEGORİ) ==================== -->
+    <main id="viewHome" class="view-screen active">
+
+      <!-- HERO: DEVICE CARE STATUS -->
+      <div class="hero-care-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #065F46; background: #ECFDF5; padding: 4px 10px; border-radius: 9999px; margin-bottom: 8px;">
+              ● SİSTEM DURUMU: KUSURSUZ
+            </span>
+            <h2 style="font-size: 20px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em;">
+              Cihazınız Optimize
+            </h2>
+            <p style="font-size: 13px; color: #64748B; margin-top: 2px;" id="heroDeviceSummary">
+              Tüm donanım ve sensörler aktif çalışıyor.
+            </p>
+          </div>
+          
+          <div class="care-score-ring">
+            <svg width="72" height="72" viewBox="0 0 72 72" style="transform: rotate(-90deg);">
+              <circle cx="36" cy="36" r="30" stroke="#F1F5F9" stroke-width="6" fill="none" />
+              <circle id="careCircleProgress" cx="36" cy="36" r="30" stroke="#0066FF" stroke-width="6" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="10" fill="none" style="transition: stroke-dashoffset 0.8s ease;" />
+            </svg>
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+              <span class="care-score-val" id="careScoreText">99</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; display: flex; gap: 10px;">
+          <button id="btnQuickOptimize" class="btn-action-primary" style="height: 42px; font-size: 13px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+            Şimdi Optimize Et
+          </button>
+          <button id="btnQuickScan" class="btn-action-secondary" style="height: 42px; font-size: 13px; width: auto; padding: 0 16px;">
+            Hızlı Teşhis
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION TITLE -->
+      <div class="section-headline">
+        <span>KONTROL VE DONANIM MODÜLLERİ</span>
+        <span style="font-size: 11px; color: #0066FF; font-weight: 700;">5 KATEGORİ</span>
+      </div>
+
+      <!-- 5 ANA KARE / KATEGORİ KARTLARI (GRID) -->
+      <div class="category-grid">
+
+        <!-- KARE 1: ŞARJ & GÜÇ İSTASYONU -->
+        <div class="category-card" data-open="viewBattery">
+          <div class="card-icon-bubble" style="background: #ECFDF5; color: #10B981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="16" height="10" x="2" y="7" rx="2" ry="2"/>
+              <line x1="22" x2="22" y1="11" y2="13"/>
+              <line x1="6" x2="6" y1="11" y2="13"/>
+              <line x1="10" x2="10" y1="11" y2="13"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Şarj &amp; Güç</div>
+            <div class="card-desc">Canlı inip çıkan mA akımı, kalan dolum/deşarj süresi</div>
+            <div class="card-metric-tag" id="gridBatteryTag" style="background: #ECFDF5; color: #065F46;">
+              <span id="gridBatteryRate">+4,820 mA</span> • <span id="gridBatteryPercent">--%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 2: GPU-Z & EKRAN -->
+        <div class="category-card" data-open="viewDisplay">
+          <div class="card-icon-bubble" style="background: #EFF6FF; color: #0066FF;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="3" rx="2"/>
+              <line x1="8" x2="16" y1="21" y2="21"/>
+              <line x1="12" x2="12" y1="17" y2="21"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">GPU-Z &amp; Ekran</div>
+            <div class="card-desc">Gerçek GPU yongası, canlı 120Hz ölçer, ölü piksel testi</div>
+            <div class="card-metric-tag" style="background: #EFF6FF; color: #1D4ED8;">
+              <span id="gridGpuName">Adreno / Mali</span> • <span id="gridFpsTag">120 Hz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 3: İŞLEMCİ & RAM (CPU/RAM) -->
+        <div class="category-card" data-open="viewCpu">
+          <div class="card-icon-bubble" style="background: #EEF2FF; color: #6366F1;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="16" height="16" x="4" y="4" rx="2"/>
+              <rect width="6" height="6" x="9" y="9" rx="1"/>
+              <path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">İşlemci &amp; RAM</div>
+            <div class="card-desc">Çekirdekler, bellek kapasitesi, CPU benchmark</div>
+            <div class="card-metric-tag" style="background: #EEF2FF; color: #4338CA;">
+              <span id="gridCpuCores">8 Çekirdek</span> • <span id="gridRam">RAM Analizi</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 4: BİYOMETRİK & SAĞLIK -->
+        <div class="category-card" data-open="viewBio">
+          <div class="card-icon-bubble" style="background: #FFF1F2; color: #EF4444;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="card-title">Biyo &amp; Nabız</div>
+            <div class="card-desc">Gerçek parmak algılamalı kamera nabız ölçer &amp; EKG</div>
+            <div class="card-metric-tag" style="background: #FFF1F2; color: #991B1B;">
+              <span id="gridBpmTag">Parmak Bekleniyor</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KARE 5: AKUSTİK & DONANIM TEŞHİS (GENİŞ KART) -->
+        <div class="category-card category-card-wide" data-open="viewDiagnostics">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="card-icon-bubble" style="background: #FFFBEB; color: #F59E0B;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+            </div>
+            <span style="font-size: 11px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 4px 10px; border-radius: 9999px;">
+              DURDURMALI KONTROL
+            </span>
+          </div>
+          <div>
+            <div class="card-title" style="font-size: 17px;">Akustik &amp; Donanım Teşhisi</div>
+            <div class="card-desc">Durdurulabilir 165Hz Su Tahliyesi, Gerçek Hassas Desibel (dB) Metre, Kapatılabilir Flaşör &amp; Çakar, Sismograf ve Çoklu Dokunmatik.</div>
+            <div class="card-metric-tag" style="background: #FFFBEB; color: #92400E; margin-top: 10px;">
+              <span>165Hz Su Tahliyesi</span> • <span>Hassas dB Metre</span> • <span>Flaş Kapatma</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER INFO -->
+      <div style="text-align: center; margin-top: 18px; padding-bottom: 24px;">
+        <span style="font-size: 12px; color: #94A3B8; font-weight: 600;">
+          APAK BİLİŞİM TEKNOLOJİLERİ © 2026 • ANDROID SDK GEREKTİRMEZ
+        </span>
+      </div>
+
+    </main>
+
+    <!-- ==================== 4. ŞARJ & GÜÇ İSTASYONU DETAYI ==================== -->
+    <section id="viewBattery" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="subpage-title-box">
+          <h2>Şarj &amp; Güç İstasyonu</h2>
+          <p>Canlı dalgalanan mA debisi, dinamik süre hesabı</p>
+        </div>
+      </div>
+
+      <!-- MAIN POWER TACHOMETER CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            <span>Anlık Akım &amp; Güç Dinamiği</span>
+          </div>
+          <span class="island-badge" id="badgeChargingState" style="background: #ECFDF5; color: #065F46;">
+            HIZLI ŞARJ AKTİF
+          </span>
+        </div>
+
+        <!-- Big Radial Tachometer & Value Display -->
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 0;">
+          <div style="position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;">
+            <svg width="180" height="180" viewBox="0 0 180 180" style="transform: rotate(-90deg);">
+              <circle cx="90" cy="90" r="74" stroke="#F1F5F9" stroke-width="12" fill="none" />
+              <circle id="batteryTachoArc" cx="90" cy="90" r="74" stroke="#10B981" stroke-width="12" stroke-linecap="round" stroke-dasharray="465" stroke-dashoffset="60" fill="none" style="transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;" />
+            </svg>
+            <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+              <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">CANLI AKIM DEBİSİ</span>
+              <span id="detailBatteryMa" style="font-size: 32px; font-weight: 800; color: #0F172A; font-family: var(--font-mono); line-height: 1.1;">+4,820</span>
+              <span id="detailBatteryUnit" style="font-size: 13px; font-weight: 700; color: #10B981;">mA (Dalgalanıyor)</span>
+            </div>
+          </div>
+          <span id="detailPowerStatusSub" style="font-size: 13px; font-weight: 600; color: #065F46; margin-top: 10px;">
+            9.8V × 6.87A (PD 3.1 Hızlı Dolum)
+          </span>
+        </div>
+
+        <!-- 4 Metrics Well -->
+        <div class="metrics-row" style="margin-top: 14px;">
+          <div class="metric-well">
+            <span class="metric-label">HESAPLANAN GÜÇ</span>
+            <span class="metric-value" id="detailWatt">67.4 W</span>
+            <span class="metric-sub" id="detailWattSub">Prizden Çekilen</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label" id="detailTimeRemainTitle">TAM DOLUMA KALAN SÜRE</span>
+            <span class="metric-value" id="detailTimeRemain" style="color: #0066FF;">14 dk 20 sn</span>
+            <span class="metric-sub" id="detailTimeRemainSub">Dinamik Tahmin</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">PİL SICAKLIĞI</span>
+            <span class="metric-value" id="detailTemp">32.8 °C</span>
+            <span class="metric-sub" id="detailTempSub" style="color: #10B981;">Nominal Sıcaklık</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">GERİLİM (VOLTAJ)</span>
+            <span class="metric-value" id="detailVoltage">4,380 mV</span>
+            <span class="metric-sub">Hücre Gerilimi</span>
+          </div>
+        </div>
+
+        <!-- PRIZ / PIL MANUEL TEST MODU (BİLGİSAYAR VE TEST İÇİN) -->
+        <div style="margin-top: 14px; padding: 12px; background: #F8FAFC; border-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #0F172A;">Şarjı Çıkart / Tak Test Butonu</div>
+            <div style="font-size: 11px; color: #64748B;">Bilgisayarda veya prizde değilken iki durumu da canlı test et</div>
+          </div>
+          <button id="btnToggleSimCharge" class="btn-action-secondary" style="height: 36px; font-size: 12px; width: auto; padding: 0 14px; font-weight: 700;">
+            Şarjı Çıkar
+          </button>
+        </div>
+      </div>
+
+      <!-- HEALTH & CYCLE CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>Pil Sağlığı &amp; Koruma</span>
+          </div>
+          <span class="island-badge" style="background: #EFF6FF; color: #1D4ED8;">%99.4 SAĞLIK</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+          <span>Pil Kapasitesi</span>
+          <span id="detailCapacity">4,890 / 5,000 mAh</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="healthProgressBar" style="width: 98%; background: #10B981;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748B; margin-top: 4px;">
+          <span>Toplam Şarj Döngüsü: 84 Çevrim</span>
+          <span>Teknoloji: Lityum-Polimer</span>
+        </div>
+
+        <!-- %80 KORUMA ALARMI SWITCH -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid #F1F5F9;">
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A;">%80 Şarj Koruma İkazı</div>
+            <div style="font-size: 12px; color: #64748B;">Pil %80'e ulaştığında sesli ve titreşimli ikaz ver</div>
+          </div>
+          <label style="position: relative; display: inline-block; width: 48px; height: 26px; cursor: pointer;">
+            <input type="checkbox" id="toggleChargeAlert" checked style="opacity: 0; width: 0; height: 0;" />
+            <span id="sliderChargeAlert" style="position: absolute; inset: 0; background: #0066FF; border-radius: 9999px; transition: 0.2s;">
+              <span style="position: absolute; left: 24px; top: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s;"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- REFRESH TEST BUTTON -->
+      <button id="btnRefreshBattery" class="btn-action-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        Batarya Sensörlerini Yeniden Sorgula
+      </button>
+    </section>
+
+    <!-- ==================== 5. GPU-Z & EKRAN DETAYI ==================== -->
+    <section id="viewDisplay" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="subpage-title-box">
+          <h2>GPU-Z &amp; Ekran Paneli</h2>
+          <p>Grafik yongası, dinamik Hz ve ekran paneli testi</p>
+        </div>
+      </div>
+
+      <!-- GPU SPECIFICATION CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="3" rx="2"/>
+            </svg>
+            <span>Grafik İşlemci (GPU) Bilgisi</span>
+          </div>
+          <span class="island-badge" style="background: #EFF6FF; color: #1D4ED8;">WEBGL 2.0 AKTİF</span>
+        </div>
+
+        <div class="metric-well" style="margin-bottom: 12px;">
+          <span class="metric-label">TESPİT EDİLEN GPU YONGASI</span>
+          <span class="metric-value" id="gpuModelText" style="font-size: 15px; color: #0066FF;">Adreno (TM) / ARM Mali</span>
+          <span class="metric-sub" id="gpuVendorText">Qualcomm Technologies / ARM Ltd</span>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-well">
+            <span class="metric-label">MAX TEXTURE BOYUTU</span>
+            <span class="metric-value" id="gpuMaxTexture">16384 × 16384</span>
+            <span class="metric-sub">Ultra Çözünürlük</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">SHADING DİLİ</span>
+            <span class="metric-value" id="gpuShaderVer">ESSL 3.00</span>
+            <span class="metric-sub">OpenGL ES 3.2</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC REFRESH RATE (HZ) CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12h20M20 12l-4-4M20 12l-4 4"/>
+            </svg>
+            <span>Canlı Ekran Yenileme Hızı</span>
+          </div>
+          <span class="island-badge" style="background: #ECFDF5; color: #065F46;">DİNAMİK ÖLÇÜM</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+          <div>
+            <div style="font-size: 44px; font-weight: 800; color: #0F172A; font-family: var(--font-mono); line-height: 1;" id="realtimeHz">
+              120 <span style="font-size: 18px; font-weight: 700; color: #0066FF;">Hz</span>
+            </div>
+            <div style="font-size: 12px; color: #64748B; margin-top: 6px;">
+              Milisaniyelik frame gecikmesi: <strong id="frameLatency">8.3 ms</strong>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="display: inline-block; padding: 6px 12px; background: #EFF6FF; border-radius: 10px; color: #1D4ED8; font-weight: 700; font-size: 13px;" id="panelTypeTag">
+              LTPO Akıcı Mod
+            </span>
+          </div>
+        </div>
+
+        <div class="metrics-row-3" style="margin-top: 12px;">
+          <div class="metric-well">
+            <span class="metric-label">ÇÖZÜNÜRLÜK</span>
+            <span class="metric-value" id="screenResolution" style="font-size: 14px;">3200×1440</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">PİKSEL ORANI</span>
+            <span class="metric-value" id="screenDpr" style="font-size: 14px;">3.0x</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">RENK DERİNLİĞİ</span>
+            <span class="metric-value" id="screenColorDepth" style="font-size: 14px;">24-Bit</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEAD PIXEL TESTER BUTTON -->
+      <div class="white-island-card" style="text-align: center;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Ölü Piksel &amp; Panel Muayenesi</h3>
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">
+          Ekranda ölü veya sıkışmış piksel olup olmadığını tam ekran renk filtreleriyle test edin.
+        </p>
+        <button id="btnStartDeadPixel" class="btn-action-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+          </svg>
+          Tam Ekran Ölü Piksel Testini Başlat
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 6. İŞLEMCİ & RAM (CPU/RAM) DETAYI ==================== -->
+    <section id="viewCpu" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="subpage-title-box">
+          <h2>İşlemci &amp; Bellek (CPU/RAM)</h2>
+          <p>Çekirdek mimarisi, depolama ve CPU performans testi</p>
+        </div>
+      </div>
+
+      <!-- CPU & RAM SPECS -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="16" height="16" x="4" y="4" rx="2"/>
+            </svg>
+            <span>Donanım Kaynakları</span>
+          </div>
+          <span class="island-badge" style="background: #EEF2FF; color: #4338CA;">ÇOK ÇEKİRDEK</span>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-well">
+            <span class="metric-label">MANTIKSAL ÇEKİRDEK</span>
+            <span class="metric-value" id="cpuCoreCount">8 Çekirdek</span>
+            <span class="metric-sub">Multithread Aktif</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">CİHAZ BELLEĞİ (RAM)</span>
+            <span class="metric-value" id="ramCapacity">12 GB</span>
+            <span class="metric-sub">LPDDR5X Yüksek Hız</span>
+          </div>
+        </div>
+
+        <!-- Storage Bar -->
+        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid #F1F5F9;">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">
+            <span>Dahili Depolama</span>
+            <span id="storageInfoText">Kullanılan: 142 GB / 256 GB</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="storageProgressBar" class="progress-bar-fill" style="width: 55%; background: #6366F1;"></div>
+          </div>
+          <span style="font-size: 11px; color: #64748B;" id="storageFreeText">114 GB Kullanılabilir Boş Alan</span>
+        </div>
+      </div>
+
+      <!-- CPU BENCHMARK TEST CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <span>5 Saniyelik CPU Benchmark Testi</span>
+          </div>
+          <span class="island-badge" id="benchStatusBadge" style="background: #F1F5F9; color: #475569;">HAZIR</span>
+        </div>
+
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 14px;">
+          Tüm işlemci çekirdeklerini yoğun matematiksel hesaplama (Asal sayı eleği &amp; matris çarpanı) döngüsüne sokarak cihazın performans skorunu ölçer.
+        </p>
+
+        <div style="background: #F8FAFC; border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 14px;">
+          <div style="font-size: 11px; font-weight: 700; color: #64748B;">APAK BENCHMARK PUANI</div>
+          <div id="benchmarkScoreVal" style="font-size: 36px; font-weight: 800; color: #0066FF; font-family: var(--font-mono); margin-top: 4px;">
+            --
+          </div>
+          <div id="benchmarkScoreSub" style="font-size: 12px; color: #64748B;">Test henüz yapılmadı</div>
+        </div>
+
+        <button id="btnRunBenchmark" class="btn-action-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          Benchmark Testini Başlat
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 7. BİYOMETRİK & SAĞLIK DETAYI ==================== -->
+    <section id="viewBio" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="subpage-title-box">
+          <h2>Biyometrik &amp; Nabız Laboratuvarı</h2>
+          <p>Kamera &amp; flaş ile nabız (BPM) ölçümü ve biyometrik kontrol</p>
+        </div>
+      </div>
+
+      <!-- CAMERA PPG HEART RATE -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+            <span>Gerçek Kamera PPG Nabız Sensörü</span>
+          </div>
+          <span class="island-badge" id="bioStatusBadge" style="background: #F1F5F9; color: #475569;">KAMERA KAPALI</span>
+        </div>
+
+        <!-- CAMERA PREVIEW & FINGER INSTRUCTION -->
+        <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px; padding: 10px; background: #F8FAFC; border-radius: 14px;">
+          <!-- Live Camera Video Element (Offscreen or mini preview) -->
+          <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; background: #000; position: relative; border: 2px solid #EF4444; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+            <video id="bioVideo" playsinline autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <div id="bioCameraPlaceholder" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #64748B; font-size: 10px; font-weight: 700;">
+              KAMERA
+            </div>
+          </div>
+          <div>
+            <div id="fingerDetectionStatus" style="font-size: 13px; font-weight: 700; color: #0F172A;">
+              Ölçümü başlatın ve parmağınızı kameraya koyun
+            </div>
+            <div id="fingerDetectionSub" style="font-size: 11px; color: #64748B; margin-top: 2px;">
+              Kameraya parmak konulmadığında asla sahte nabız üretilmez.
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic ECG Canvas -->
+        <div style="width: 100%; height: 90px; background: #0F172A; border-radius: 14px; position: relative; overflow: hidden; margin-bottom: 12px;">
+          <canvas id="ecgCanvas" width="480" height="90" style="width: 100%; height: 100%; display: block;"></canvas>
+          <div id="ecgWaveLabel" style="position: absolute; top: 8px; right: 10px; font-size: 10px; color: #64748B; font-family: var(--font-mono); font-weight: 700;">
+            EKG BEKLEMEDE
+          </div>
+        </div>
+
+        <!-- BPM Readout -->
+        <div style="display: flex; align-items: center; justify-content: space-between; background: #FFF1F2; border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #991B1B;">ÖLÇÜLEN GERÇEK NABIZ</div>
+            <div style="font-size: 36px; font-weight: 800; color: #E11D48; font-family: var(--font-mono); line-height: 1.1;" id="bpmValue">
+              -- <span style="font-size: 16px; font-weight: 600;">BPM</span>
+            </div>
+            <div style="font-size: 12px; color: #991B1B;" id="bpmStatusSub">Parmağınızı bekliyor</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 12px; font-weight: 700; color: #0F172A;" id="bioSpO2">SpO2: %--</div>
+            <div style="font-size: 12px; color: #64748B; margin-top: 4px;" id="bioHrv">Optik Sensör: Hazır</div>
+          </div>
+        </div>
+
+        <button id="btnToggleHeartRate" class="btn-action-primary btn-action-rose">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+          </svg>
+          <span id="btnHeartRateText">Kamera ile Nabız Ölçümünü Başlat</span>
+        </button>
+      </div>
+
+      <!-- BIOMETRIC FINGERPRINT & WEBAUTHN TEST -->
+      <div class="white-island-card" style="text-align: center;">
+        <h3 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Gerçek Donanımsal Biyometrik Doğrulama</h3>
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 14px;">
+          Telefonunuzun kendi yerel parmak izi / yüz tanıma sensörünü (WebAuthn) test edin veya aşağıdaki alana basılı tutun.
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 14px;">
+          <button id="btnNativeWebAuthn" class="btn-action-primary" style="height: 42px; font-size: 13px; width: auto; padding: 0 18px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+              <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+              <path d="M2 12a10 10 0 0 1 18-6"/>
+            </svg>
+            Telefonun Parmak İzini Tetikle
+          </button>
+        </div>
+
+        <div id="btnFingerprintTest" style="width: 80px; height: 80px; margin: 0 auto; border-radius: 50%; background: #EFF6FF; border: 2px dashed #0066FF; display: flex; align-items: center; justify-content: center; color: #0066FF; cursor: pointer; transition: all 0.2s ease;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+            <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+            <path d="M17.29 21.02c.12-.6.43-2.3.43-3.02 0-2.22-.72-3.8-1.72-5.5"/>
+            <path d="M2 12a10 10 0 0 1 18-6"/>
+            <path d="M2 16h.01"/>
+            <path d="M21.8 16c.2-2 .131-5.354 0-6"/>
+            <path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/>
+          </svg>
+        </div>
+        <div id="fingerprintStatus" style="font-size: 12px; font-weight: 600; color: #0066FF; margin-top: 10px;">
+          Sensöre dokunun ve 1.5 sn basılı tutun
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 8. AKUSTİK & DONANIM TEŞHİS DETAYI ==================== -->
+    <section id="viewDiagnostics" class="view-screen">
+      <div class="subpage-nav">
+        <button class="btn-back" data-back="viewHome" aria-label="Geri">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="subpage-title-box">
+          <h2>Akustik &amp; Donanım Teşhis</h2>
+          <p>Hoparlör su tahliyesi, ses ölçer, flaşör ve sensörler</p>
+        </div>
+      </div>
+
+      <!-- 165Hz WATER EJECTOR CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4V5Z"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            <span>Hoparlör Su &amp; Toz Tahliye Dalgası</span>
+          </div>
+          <span class="island-badge" id="badgeWaterEject" style="background: #FFFBEB; color: #92400E;">165 HZ REZONANS</span>
+        </div>
+
+        <p style="font-size: 13px; color: #64748B; margin-bottom: 14px;">
+          Hoparlör ızgarasına su kaçtığında veya toz dolduğunda, yüksek genlikli 165Hz ses ve hava basıncı ile sıvıyı dışarı fırlatır. İstediğiniz an durdurabilirsiniz.
+        </p>
+
+        <!-- START AND STOP BUTTONS -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <button id="btnWaterEject" class="btn-action-primary btn-action-amber" style="flex: 2;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span id="btnWaterEjectText">Tahliyeyi Başlat (165Hz)</span>
+          </button>
+
+          <button id="btnStopWaterEject" class="btn-action-secondary" style="flex: 1; border-color: #EF4444; color: #EF4444; font-weight: 700;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+            </svg>
+            Durdur
+          </button>
+        </div>
+
+        <div id="waterEjectProgressBox" style="display: none; background: #FFFBEB; border-radius: 12px; padding: 12px; text-align: center;">
+          <span style="font-size: 12px; font-weight: 700; color: #92400E;" id="waterEjectStatusText">TAHLİYE DALGASI AKTİF — ÇIKMAK İÇİN DURDUR'A BASIN</span>
+          <div class="progress-bar-track" style="margin-top: 8px;">
+            <div id="waterEjectFill" class="progress-bar-fill" style="width: 0%; background: #F59E0B;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DECIBEL METER CARD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/>
+            </svg>
+            <span>Gerçek Zamanlı Hassas Desibel (dB) Ölçer</span>
+          </div>
+          <span class="island-badge" id="decibelBadge" style="background: #EFF6FF; color: #1D4ED8;">MİKROFON HAZIR</span>
+        </div>
+
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;">
+          <div>
+            <span id="decibelValue" style="font-size: 38px; font-weight: 800; color: #0F172A; font-family: var(--font-mono);">
+              --
+            </span>
+            <span style="font-size: 16px; font-weight: 700; color: #0066FF;">dB(A)</span>
+          </div>
+          <span id="decibelLevelDesc" style="font-size: 13px; font-weight: 600; color: #10B981;">
+            Ölçüm Başlatılmadı
+          </span>
+        </div>
+
+        <!-- VU Meter Bar -->
+        <div class="progress-bar-track" style="height: 12px;">
+          <div id="decibelBarFill" class="progress-bar-fill" style="width: 0%; background: linear-gradient(90deg, #10B981 60%, #F59E0B 85%, #EF4444 100%); transition: width 0.08s ease;"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <button id="btnToggleDecibel" class="btn-action-primary" style="height: 42px; font-size: 13px;">
+            Gerçek Mikrofon ile Ölçümü Başlat
+          </button>
+        </div>
+      </div>
+
+      <!-- FREQUENCY GENERATOR CARD (20Hz - 20,000Hz) -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 10s3-3 5-3 5 6 7 6 5-3 8-3"/>
+            </svg>
+            <span>Frekans Jeneratörü (Hoparlör Testi)</span>
+          </div>
+          <span class="island-badge" id="freqValueTag" style="background: #EEF2FF; color: #4338CA;">440 Hz</span>
+        </div>
+
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 8px;">
+          Hoparlör bas (20Hz) ve tiz (20.000Hz) yanıtını test etmek için kaydırıcıyı hareket ettirin.
+        </p>
+
+        <input type="range" id="freqSlider" min="20" max="20000" value="440" style="width: 100%; margin: 10px 0; cursor: pointer;" />
+        
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button id="btnPlayFreq" class="btn-action-primary" style="height: 40px; font-size: 13px;">
+            Frekansı Çal
+          </button>
+          <button id="btnStopFreq" class="btn-action-secondary" style="height: 40px; font-size: 13px; border-color: #EF4444; color: #EF4444;">
+            Durdur
+          </button>
+        </div>
+      </div>
+
+      <!-- FLASHLIGHT / STROBOSCOPE WITH EXPLICIT OFF BUTTON -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            <span>Fener &amp; Stroboskop (Aç/Kapat)</span>
+          </div>
+          <span class="island-badge" id="torchBadge" style="background: #F1F5F9; color: #475569;">FENER KAPALI</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px;">
+          <button id="btnTorchOn" class="btn-action-secondary" style="height: 44px; font-size: 13px; font-weight: 700; color: #0066FF;">
+            💡 Fener Aç
+          </button>
+          <button id="btnTorchOff" class="btn-action-secondary" style="height: 44px; font-size: 13px; font-weight: 700; color: #EF4444; border-color: #FCA5A5;">
+            🛑 Feneri Kapat
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <button id="btnStrobe10Hz" class="btn-action-secondary" style="height: 42px; font-size: 12px; font-weight: 700;">
+            10 Hz Çakar Flaş
+          </button>
+          <button id="btnStrobeSos" class="btn-action-secondary" style="height: 42px; font-size: 12px; font-weight: 700; color: #EF4444;">
+            S.O.S Acil Durum
+          </button>
+        </div>
+
+        <div id="torchStatusText" style="font-size: 11px; color: #64748B; text-align: center; margin-top: 10px;">
+          Donanımsal Flaşör Hazır
+        </div>
+      </div>
+
+      <!-- DESKTOP SEISMOGRAPH & GYROSCOPE -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            <span>Masaüstü Sismografı (Titreşim/Sarsıntı)</span>
+          </div>
+          <span class="island-badge" id="seismoAlarmBadge" style="background: #ECFDF5; color: #065F46;">DURGUN</span>
+        </div>
+
+        <p style="font-size: 12px; color: #64748B; margin-bottom: 8px;">
+          Telefonu masaya bırakın. Masaya dokunulduğunda mikro ivmeölçer hassas sarsıntıyı anlık tespit eder.
+        </p>
+
+        <div class="metrics-row-3" style="margin-bottom: 10px;">
+          <div class="metric-well">
+            <span class="metric-label">X EKSENİ</span>
+            <span class="metric-value" id="gyroX" style="font-size: 14px;">0.00</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">Y EKSENİ</span>
+            <span class="metric-value" id="gyroY" style="font-size: 14px;">0.00</span>
+          </div>
+          <div class="metric-well">
+            <span class="metric-label">Z (YERÇEKİMİ)</span>
+            <span class="metric-value" id="gyroZ" style="font-size: 14px;">9.81</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MULTI-TOUCH TEST PAD -->
+      <div class="white-island-card">
+        <div class="island-header">
+          <div class="island-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
+              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
+              <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
+              <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+            </svg>
+            <span>10 Parmak Çoklu Dokunmatik Testi</span>
+          </div>
+          <span class="island-badge" id="touchCountBadge" style="background: #EFF6FF; color: #1D4ED8;">0 Parmak</span>
+        </div>
+
+        <div id="touchTestPad">
+          Ekrana aynı anda 1 veya birden fazla parmağınızla dokunun
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- FULLSCREEN DEAD PIXEL OVERLAY -->
+  <div id="deadPixelOverlay"></div>
+
+  <!-- Main Application Logic -->
+  <script src="./app.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('APAK BİLİŞİM Service Worker aktif:', reg.scope);
+        }).catch((err) => {
+          console.warn('Service worker kayıt hatası:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

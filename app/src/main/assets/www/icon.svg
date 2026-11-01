@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0c1829"/>
+      <stop offset="70%" stop-color="#06090e"/>
+      <stop offset="100%" stop-color="#020406"/>
+    </radialGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7df4ff"/>
+      <stop offset="50%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#00a3b0"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe082"/>
+      <stop offset="100%" stop-color="#feb300"/>
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Obsidian Shield Base -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGlow)"/>
+  
+  <!-- Outer Tactical HUD Border -->
+  <rect x="24" y="24" width="464" height="464" rx="84" fill="none" stroke="#00f0ff" stroke-width="2" stroke-opacity="0.25"/>
+  <rect x="36" y="36" width="440" height="440" rx="72" fill="none" stroke="#3b494b" stroke-width="1.5" stroke-dasharray="8 12"/>
+  
+  <!-- Precision Corner Brackets -->
+  <path d="M 50 110 L 50 60 L 110 60" fill="none" stroke="#00f0ff" stroke-width="4"/>
+  <path d="M 462 110 L 462 60 L 402 60" fill="none" stroke="#00f0ff" stroke-width="4"/>
+  <path d="M 50 402 L 50 452 L 110 452" fill="none" stroke="#00f0ff" stroke-width="4"/>
+  <path d="M 462 402 L 462 452 L 402 452" fill="none" stroke="#00f0ff" stroke-width="4"/>
+
+  <!-- Rotating Radar Ring Graphics -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#00f0ff" stroke-width="3" stroke-dasharray="140 40 80 30" stroke-opacity="0.6"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#feb300" stroke-width="2" stroke-dasharray="60 60" stroke-opacity="0.5"/>
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#00e676" stroke-width="1" stroke-dasharray="6 14" stroke-opacity="0.4"/>
+
+  <!-- Central High-Tech Geometric APAK 'A' Monogram -->
+  <g filter="url(#neonGlow)">
+    <!-- Main A Glyph -->
+    <path d="M 256 120 L 340 330 L 296 330 L 274 274 L 238 274 L 216 330 L 172 330 Z M 256 195 L 244 242 L 268 242 Z" 
+          fill="url(#cyanGrad)"/>
+    <!-- Crosshair Lines -->
+    <line x1="256" y1="80" x2="256" y2="120" stroke="#00f0ff" stroke-width="3"/>
+    <line x1="256" y1="340" x2="256" y2="380" stroke="#00f0ff" stroke-width="3"/>
+    <line x1="120" y1="256" x2="160" y2="256" stroke="#00f0ff" stroke-width="3"/>
+    <line x1="352" y1="256" x2="392" y2="256" stroke="#00f0ff" stroke-width="3"/>
+  </g>
+
+  <!-- Wordmark 'APAK BİLİŞİM' -->
+  <text x="256" y="420" font-family="'Space Grotesk', 'Arial Black', sans-serif" font-size="28" font-weight="900" 
+        fill="#dbfcff" letter-spacing="10" text-anchor="middle">APAK</text>
+  <text x="256" y="445" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="600" 
+        fill="#feb300" letter-spacing="4" text-anchor="middle">BİLİŞİM TELEMETRİ</text>
+</svg>
